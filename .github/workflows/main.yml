@@ -1,9 +1,8 @@
-name: Realistic-Long-Log-CI-CD-Pipeline
+name: Huge-Log-CI-CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
 
 jobs:
@@ -11,94 +10,73 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up NodeJS
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-
-      - name: Install Dependencies
+      - name: Generate Long Log File
         run: |
-          echo "Installing dependencies..." 
-          echo "---- npm install output ----" > ci-install.log
-          echo "Resolving packages..." >> ci-install.log
-          echo "Fetching registry..." >> ci-install.log
-          for i in {1..50}; do
-            echo "Downloading package $i of 50..." >> ci-install.log
-            sleep 0.02
-          done
-          echo "Installing modules..." >> ci-install.log
-          npm install >> ci-install.log 2>&1 || true
-          echo "Completed dependency installation." >> ci-install.log
+          echo "===== CI/CD PIPELINE LOG START =====" > log.txt
+          echo "" >> log.txt
+          echo "[INFO] Initializing CI pipeline..." >> log.txt
+          echo "[INFO] Timestamp: $(date)" >> log.txt
+          echo "" >> log.txt
 
-      - name: Run Linting
-        run: |
-          echo "Running lint checks..."
-          echo "---- npm run lint output ----" > ci-lint.log
-          for i in {1..40}; do
-            echo "src/components/Component$i.js: Warning: unused variable 'temp$i'" >> ci-lint.log
-            echo "src/utils/helper$i.js: Info: Consider using const instead of let" >> ci-lint.log
+          echo "---- STEP 1: Installing Dependencies ----" >> log.txt
+          for i in {1..100}; do
+            echo "[INSTALL] Downloading package $i/100..." >> log.txt
             sleep 0.01
           done
-          echo "Linting completed with warnings." >> ci-lint.log
+          echo "[INSTALL] Running npm install..." >> log.txt
+          npm install >> log.txt 2>&1 || true
+          echo "[INSTALL] Completed installation." >> log.txt
+          echo "" >> log.txt
 
-      - name: Run Unit Tests
-        run: |
-          echo "Running unit tests..."
-          echo "---- npm test output ----" > ci-tests.log
-          for i in {1..30}; do
-            echo "Test Suite $i: PASS" >> ci-tests.log
-            sleep 0.01
-          done
-          echo "Test Suite 31: FAIL" >> ci-tests.log
-          echo "  ✖ should return correct value" >> ci-tests.log
-          echo "    Expected: 42" >> ci-tests.log
-          echo "    Received: undefined" >> ci-tests.log
-          echo "" >> ci-tests.log
-          echo "Test execution finished with 1 failed test." >> ci-tests.log
-
-      - name: Run Build (Long, Realistic Failure Logs)
-        run: |
-          echo "---- Build Started ----" > ci-build.log
-          echo "Initializing build system..." >> ci-build.log
-          echo "Cleaning old artifacts..." >> ci-build.log
-          echo "Loading Webpack configuration..." >> ci-build.log
-          
+          echo "---- STEP 2: Linting ----" >> log.txt
           for i in {1..80}; do
-            echo "Compiling module: src/components/Widget$i.js..." >> ci-build.log
-            echo "Compiling module: src/utils/Utility$i.js..." >> ci-build.log
-            echo "Compiling module: src/screens/Screen$i.js..." >> ci-build.log
+            echo "src/module_$i.js: Warning: '$i' is assigned a value but never used." >> log.txt
+            sleep 0.005
+          done
+          echo "[LINT] Linting finished with warnings." >> log.txt
+          echo "" >> log.txt
+
+          echo "---- STEP 3: Running Tests ----" >> log.txt
+          for i in {1..50}; do
+            echo "[TEST] Test suite $i: PASS" >> log.txt
+            sleep 0.005
+          done
+          echo "[TEST] Test suite 51: FAIL" >> log.txt
+          echo "[TEST]   Expected: true" >> log.txt
+          echo "[TEST]   Received: false" >> log.txt
+          echo "[TEST] Tests completed with 1 failure." >> log.txt
+          echo "" >> log.txt
+
+          echo "---- STEP 4: Build Process ----" >> log.txt
+          echo "[BUILD] Starting Webpack build..." >> log.txt
+          for i in {1..150}; do
+            echo "[BUILD] Compiling src/components/Component$i.js..." >> log.txt
+            echo "[BUILD] Compiling src/utils/Helper$i.js..." >> log.txt
+            sleep 0.005
+          done
+          echo "" >> log.txt
+
+          echo "[BUILD] Optimizing chunks..." >> log.txt
+          for i in {1..30}; do
+            echo "[BUILD] Processing chunk $i/30..." >> log.txt
             sleep 0.01
           done
+          echo "" >> log.txt
 
-          echo "" >> ci-build.log
-          echo "[Webpack] Optimizing chunks..." >> ci-build.log
-          for i in {1..40}; do
-            echo "[Webpack] Processing chunk $i/40..." >> ci-build.log
-            sleep 0.01
-          done
+          echo "[ERROR] Failed to compile 'Dashboard.js' at line 203:12" >> log.txt
+          echo "[ERROR] Unexpected token '>'." >> log.txt
+          echo "[ERROR] Build terminated due to syntax errors." >> log.txt
+          echo "" >> log.txt
+          echo "===== CI/CD PIPELINE LOG END =====" >> log.txt
 
-          echo "" >> ci-build.log
-          echo "[Webpack] ERROR in src/components/Dashboard.js" >> ci-build.log
-          echo "  ✖ Unexpected token '<' at line 178:5" >> ci-build.log
-          echo "  ✖ Failed to parse JSX element" >> ci-build.log
-          echo "[Webpack] ERROR in src/components/Header.js" >> ci-build.log
-          echo "  ✖ Undefined variable 'isLoogedIn'" >> ci-build.log
-          echo "  ✖ Did you mean 'isLoggedIn'?" >> ci-build.log
-          echo "" >> ci-build.log
+          exit 1  # Fail intentionally
 
-          echo "[Build] Build failed due to syntax errors." >> ci-build.log
-          exit 1
-
-      - name: Upload All Logs
+      - name: Upload log.txt Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ci-cd-logs
-          path: |
-            ci-install.log
-            ci-lint.log
-            ci-tests.log
-            ci-build.log
+          name: huge-log-file
+          path: log.txt

@@ -1,4 +1,4 @@
-def nested_maze_calculator(data_list, depth_limit, multiplier):
+def nested_maze_calculator(data_list, depth_limit, multiplier:
     """
     Calculates an arbitrary "Maze Score."
     This function is designed to have extremely high Cyclomatic Complexity
@@ -64,11 +64,3 @@ def nested_maze_calculator(data_list, depth_limit, multiplier):
         clean_count += 1
         
     return maze_score
-
-# Example Usage:
-input_data = [10, 55, 2, 80, -10, 30, None, 15]
-limit = 4
-factor = 1.5
-
-result = nested_maze_calculator(input_data, limit, factor)
-print(f"The Final Maze Score is: {result}")

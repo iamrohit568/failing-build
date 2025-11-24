@@ -1,4 +1,4 @@
-name: CI-CD-Pipeline
+name: Realistic-CI-CD-Pipeline
 
 on:
   push:
@@ -11,24 +11,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Dependencies (example)
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
         run: |
           echo "Installing dependencies..."
-          sleep 1
+          echo "---- npm install output ----" > ci-install.log
+          npm install >> ci-install.log 2>&1 || true
 
-      - name: Run Build Command (this will fail intentionally)
+      - name: Run Linting
         run: |
-          echo "Running build..."
-          echo "This build will fail intentionally!" > build.log
-          echo "Simulating error..."
-          exit 1
+          echo "Running lint checks..."
+          echo "---- npm run lint output ----" > ci-lint.log
+          npm run lint >> ci-lint.log 2>&1 || true
 
-      - name: Upload Build Log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: build.log
+      - name: Run Unit Tests
+        run: |
+          echo "Running unit tests..."
+          echo "---- npm test output ----" > ci-tests.log
+          npm test >> ci-tests.log 2>&1 || true
+
+      - name: Run Build (Realistic Failure)
+        run: |
+          echo "---- Build Started ----" > ci-build.log
+          echo "Compiling project files..." >> ci-build.log
+          echo "Validating config files..." >> ci-build.log
+          echo "Running Webpack build..." >> ci-build.log
+          
+          # Simulate task logs
+          sleep 2
+          echo "[ERROR] Failed to compile module 'dashboard.js'" >

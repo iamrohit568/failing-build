@@ -1,0 +1,82 @@
+name: Huge-Log-CI-CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Generate Long Log File
+        run: |
+          echo "===== CI/CD PIPELINE LOG START =====" > log.txt
+          echo "" >> log.txt
+          echo "[INFO] Initializing CI pipeline..." >> log.txt
+          echo "[INFO] Timestamp: $(date)" >> log.txt
+          echo "" >> log.txt
+
+          echo "---- STEP 1: Installing Dependencies ----" >> log.txt
+          for i in {1..100}; do
+            echo "[INSTALL] Downloading package $i/100..." >> log.txt
+            sleep 0.01
+          done
+          echo "[INSTALL] Running npm install..." >> log.txt
+          npm install >> log.txt 2>&1 || true
+          echo "[INSTALL] Completed installation." >> log.txt
+          echo "" >> log.txt
+
+          echo "---- STEP 2: Linting ----" >> log.txt
+          for i in {1..80}; do
+            echo "src/module_$i.js: Warning: '$i' is assigned a value but never used." >> log.txt
+            sleep 0.005
+          done
+          echo "[LINT] Linting finished with warnings." >> log.txt
+          echo "" >> log.txt
+
+          echo "---- STEP 3: Running Tests ----" >> log.txt
+          for i in {1..50}; do
+            echo "[TEST] Test suite $i: PASS" >> log.txt
+            sleep 0.005
+          done
+          echo "[TEST] Test suite 51: FAIL" >> log.txt
+          echo "[TEST]   Expected: true" >> log.txt
+          echo "[TEST]   Received: false" >> log.txt
+          echo "[TEST] Tests completed with 1 failure." >> log.txt
+          echo "" >> log.txt
+
+          echo "---- STEP 4: Build Process ----" >> log.txt
+          echo "[BUILD] Starting Webpack build..." >> log.txt
+          for i in {1..150}; do
+            echo "[BUILD] Compiling src/components/Component$i.js..." >> log.txt
+            echo "[BUILD] Compiling src/utils/Helper$i.js..." >> log.txt
+            sleep 0.005
+          done
+          echo "" >> log.txt
+
+          echo "[BUILD] Optimizing chunks..." >> log.txt
+          for i in {1..30}; do
+            echo "[BUILD] Processing chunk $i/30..." >> log.txt
+            sleep 0.01
+          done
+          echo "" >> log.txt
+
+          echo "[ERROR] Failed to compile 'Dashboard.js' at line 203:12" >> log.txt
+          echo "[ERROR] Unexpected token '>'." >> log.txt
+          echo "[ERROR] Build terminated due to syntax errors." >> log.txt
+          echo "" >> log.txt
+          echo "===== CI/CD PIPELINE LOG END =====" >> log.txt
+
+          exit 1  # Fail intentionally
+
+      - name: Upload log.txt Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: huge-log-file
+          path: log.txt

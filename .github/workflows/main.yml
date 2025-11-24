@@ -1,4 +1,4 @@
-name: Realistic-CI-CD-Pipeline
+name: Realistic-Long-Log-CI-CD-Pipeline
 
 on:
   push:
@@ -21,29 +21,84 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          echo "Installing dependencies..."
+          echo "Installing dependencies..." 
           echo "---- npm install output ----" > ci-install.log
+          echo "Resolving packages..." >> ci-install.log
+          echo "Fetching registry..." >> ci-install.log
+          for i in {1..50}; do
+            echo "Downloading package $i of 50..." >> ci-install.log
+            sleep 0.02
+          done
+          echo "Installing modules..." >> ci-install.log
           npm install >> ci-install.log 2>&1 || true
+          echo "Completed dependency installation." >> ci-install.log
 
       - name: Run Linting
         run: |
           echo "Running lint checks..."
           echo "---- npm run lint output ----" > ci-lint.log
-          npm run lint >> ci-lint.log 2>&1 || true
+          for i in {1..40}; do
+            echo "src/components/Component$i.js: Warning: unused variable 'temp$i'" >> ci-lint.log
+            echo "src/utils/helper$i.js: Info: Consider using const instead of let" >> ci-lint.log
+            sleep 0.01
+          done
+          echo "Linting completed with warnings." >> ci-lint.log
 
       - name: Run Unit Tests
         run: |
           echo "Running unit tests..."
           echo "---- npm test output ----" > ci-tests.log
-          npm test >> ci-tests.log 2>&1 || true
+          for i in {1..30}; do
+            echo "Test Suite $i: PASS" >> ci-tests.log
+            sleep 0.01
+          done
+          echo "Test Suite 31: FAIL" >> ci-tests.log
+          echo "  ✖ should return correct value" >> ci-tests.log
+          echo "    Expected: 42" >> ci-tests.log
+          echo "    Received: undefined" >> ci-tests.log
+          echo "" >> ci-tests.log
+          echo "Test execution finished with 1 failed test." >> ci-tests.log
 
-      - name: Run Build (Realistic Failure)
+      - name: Run Build (Long, Realistic Failure Logs)
         run: |
           echo "---- Build Started ----" > ci-build.log
-          echo "Compiling project files..." >> ci-build.log
-          echo "Validating config files..." >> ci-build.log
-          echo "Running Webpack build..." >> ci-build.log
+          echo "Initializing build system..." >> ci-build.log
+          echo "Cleaning old artifacts..." >> ci-build.log
+          echo "Loading Webpack configuration..." >> ci-build.log
           
-          # Simulate task logs
-          sleep 2
-          echo "[ERROR] Failed to compile module 'dashboard.js'" >
+          for i in {1..80}; do
+            echo "Compiling module: src/components/Widget$i.js..." >> ci-build.log
+            echo "Compiling module: src/utils/Utility$i.js..." >> ci-build.log
+            echo "Compiling module: src/screens/Screen$i.js..." >> ci-build.log
+            sleep 0.01
+          done
+
+          echo "" >> ci-build.log
+          echo "[Webpack] Optimizing chunks..." >> ci-build.log
+          for i in {1..40}; do
+            echo "[Webpack] Processing chunk $i/40..." >> ci-build.log
+            sleep 0.01
+          done
+
+          echo "" >> ci-build.log
+          echo "[Webpack] ERROR in src/components/Dashboard.js" >> ci-build.log
+          echo "  ✖ Unexpected token '<' at line 178:5" >> ci-build.log
+          echo "  ✖ Failed to parse JSX element" >> ci-build.log
+          echo "[Webpack] ERROR in src/components/Header.js" >> ci-build.log
+          echo "  ✖ Undefined variable 'isLoogedIn'" >> ci-build.log
+          echo "  ✖ Did you mean 'isLoggedIn'?" >> ci-build.log
+          echo "" >> ci-build.log
+
+          echo "[Build] Build failed due to syntax errors." >> ci-build.log
+          exit 1
+
+      - name: Upload All Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-cd-logs
+          path: |
+            ci-install.log
+            ci-lint.log
+            ci-tests.log
+            ci-build.log
